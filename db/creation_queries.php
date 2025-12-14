@@ -52,10 +52,12 @@ $queries = [
       data_inicio DATE NOT NULL,
       data_termino DATE NOT NULL,
       percentual_desc DECIMAL(5,2) NOT NULL,
-      quantidade INT NOT NULL DEFAULT 1,
+      quantidade INT NOT NULL DEFAULT 1,   -- estoque atual
+      total INT NOT NULL DEFAULT 1,        -- total original cadastrado
       FOREIGN KEY (comercio_cnpj) REFERENCES comercio(cnpj)
-        ON DELETE CASCADE ON UPDATE CASCADE
+        ON DELETE RESTRICT ON UPDATE CASCADE
     )",
+
 
     // ====== Tabela: associado_cupom ======
     "CREATE TABLE IF NOT EXISTS associado_cupom (
@@ -66,12 +68,19 @@ $queries = [
       data_reserva DATE NOT NULL DEFAULT (CURRENT_DATE),
       data_uso DATE NULL,
       FOREIGN KEY (num_cupom) REFERENCES cupom(num_cupom)
-        ON DELETE CASCADE ON UPDATE CASCADE,
+        ON DELETE RESTRICT ON UPDATE CASCADE,
       FOREIGN KEY (associado_cpf) REFERENCES associado(cpf)
-        ON DELETE CASCADE ON UPDATE CASCADE,
+        ON DELETE RESTRICT ON UPDATE CASCADE,
       UNIQUE KEY uq_cupom_associado (num_cupom, associado_cpf)
     )",
 
+    "CREATE TABLE recuperar_senha (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      identificador VARCHAR(20) NOT NULL, -- pode ser CPF ou CNPJ
+      chave VARCHAR(64) NOT NULL,
+      vence_em DATETIME NOT NULL,
+      usado TINYINT(1) DEFAULT 0
+    )",
 
     // ===== INSERTS ======
 
@@ -85,7 +94,7 @@ $queries = [
 
     // Inserts associado
     "INSERT INTO associado (cpf, nome, data_nascimento, celular, email, senha_hash, endereco, bairro, cidade, uf, cep) VALUES
-      ('111.222.333-44', 'Lucas Silva', '1998-05-12', '11 90000-0001', 'lucas@example.com', '\$2y\$10\$E6SS79DaMeo8M/mPfaJtueSTf15IhhblVSSG8hVvBLS6F.zfaNsdO', 'Rua A, 123', 'Centro', 'Dumont', 'SP', '14000-000'),
+      ('111.222.333-44', 'Lucas Silva', '1998-05-12', '11 90000-0001', 'raraujo952.ra24@gmail.com', '\$2y\$10\$E6SS79DaMeo8M/mPfaJtueSTf15IhhblVSSG8hVvBLS6F.zfaNsdO', 'Rua A, 123', 'Centro', 'Dumont', 'SP', '14000-000'),
       ('555.666.777-88', 'Mariana Souza', '1995-09-30', '11 90000-0002', 'mariana@example.com', '\$2y\$10\$J1x696N.Zz6y69SO4qPtUedMdnXE87Q9rchdLYE.Sk2ONa1hreLei', 'Av. B, 456', 'Jardins', 'São Paulo', 'SP', '01000-000'),
       ('999.000.111-22', 'João Pereira', '2000-01-20', '11 90000-0003', 'joao@example.com', '\$2y\$10\$gnolgg93Y1UZTRIRKookf.8YdSKzqrcahvSv4iRBFnlRSKYgz4r7e', 'Rua C, 789', 'Centro', 'Ribeirão Preto', 'SP', '14010-000')
     ON DUPLICATE KEY UPDATE nome = VALUES(nome), email = VALUES(email)",
@@ -98,11 +107,19 @@ $queries = [
     ON DUPLICATE KEY UPDATE razao_social = VALUES(razao_social), email = VALUES(email)",
 
     // Inserts cupom (referenciam cnpjs acima)
-    "INSERT INTO cupom (num_cupom, comercio_cnpj, titulo, data_emissao, data_inicio, data_termino, percentual_desc, quantidade) VALUES
-      ('ABCDEF123456', '12.345.678/0001-90', 'Desconto Mercado 10%', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 30 DAY), 10.00, 5),
-      ('ZXCVBN987654', '98.765.432/0001-10', 'Almoço 15% OFF', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 20 DAY), 15.00, 3),
-      ('QWERTY112233', '11.222.333/0001-55', 'Medicamentos 5% OFF', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 15 DAY), 5.00, 10)
-    ON DUPLICATE KEY UPDATE titulo = VALUES(titulo), percentual_desc = VALUES(percentual_desc), quantidade = VALUES(quantidade)",
+    "INSERT INTO cupom (num_cupom, comercio_cnpj, titulo, data_emissao, data_inicio, data_termino, percentual_desc, quantidade, total) VALUES
+      ('ESGOTADO1111', '12.345.678/0001-90', 'Cupom Esgotado', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 15 DAY), 8.00, 0, 10),
+      ('VENCIDO22222', '12.345.678/0001-90', 'Cupom Vencido', CURRENT_DATE, DATE_SUB(CURDATE(), INTERVAL 10 DAY), DATE_SUB(CURDATE(), INTERVAL 1 DAY), 12.00, 2, 5),
+      ('AGENDADO3333', '12.345.678/0001-90', 'Cupom Agendado', CURRENT_DATE, DATE_ADD(CURDATE(), INTERVAL 5 DAY), DATE_ADD(CURDATE(), INTERVAL 20 DAY), 20.00, 7, 7),
+      ('ATIVO444444', '12.345.678/0001-90', 'Cupom Ativo com 1 disponível', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 25 DAY), 5.00, 1, 5),
+      ('ATIVO555555', '12.345.678/0001-90', 'Cupom Ativo Longo Prazo', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 90 DAY), 15.00, 20, 20),
+      ('QUASEVENC666', '12.345.678/0001-90', 'Cupom Quase Vencendo', CURRENT_DATE, DATE_SUB(CURDATE(), INTERVAL 2 DAY), DATE_ADD(CURDATE(), INTERVAL 1 DAY), 7.50, 3, 5),
+      ('AGENDADO77', '12.345.678/0001-90', 'Cupom Futuro Estoque Alto', CURRENT_DATE, DATE_ADD(CURDATE(), INTERVAL 10 DAY), DATE_ADD(CURDATE(), INTERVAL 40 DAY), 25.00, 50, 50),
+        
+      ('ABCDEF123456', '12.345.678/0001-90', 'Desconto Mercado 10%', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 30 DAY), 10.00, 5, 5),
+      ('ZXCVBN987654', '98.765.432/0001-10', 'Almoço 15% OFF', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 20 DAY), 15.00, 3, 3),
+      ('QWERTY112233', '11.222.333/0001-55', 'Medicamentos 5% OFF', CURRENT_DATE, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 15 DAY), 5.00, 10, 10)
+    ON DUPLICATE KEY UPDATE titulo = VALUES(titulo), percentual_desc = VALUES(percentual_desc), quantidade = VALUES(quantidade), total = VALUES(total)",
 
     // Inserts associado_cupom (exemplos de reservas)
     "INSERT INTO associado_cupom (num_cupom, associado_cpf, codigo_reserva, data_reserva, data_uso) VALUES

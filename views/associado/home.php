@@ -6,14 +6,7 @@
     <link rel="stylesheet" href="../../views/assets/css/associado.css">
 </head>
 <body>
-    <?php
-    //    ini_set('display_errors', 1);
-     //   ini_set('display_startup_errors', 1);
-      //  error_reporting(E_ALL);
-    ?>
-
-
-    <h2>Bem-vindo, Associado</h2>
+    <h2>Bem-vindo, <?php echo htmlspecialchars($_SESSION['nome']); ?></h2>
     <p><a href="../logout.php">Sair</a> | <a href="meus_cupons.php">Meus Cupons</a></p>
 
     <?php if (!empty($_GET['msg'])): ?>
@@ -34,25 +27,31 @@
         <button type="submit">Filtrar</button>
     </form>
 
-    <h3>Cupons disponíveis</h3>
+    <h3>Cupons disponíveis para você</h3>
     <?php if (!empty($cupons)): ?>
         <table border="1" cellpadding="5">
             <tr>
-                <th>Código</th>
                 <th>Título</th>
                 <th>Comércio</th>
                 <th>Categoria</th>
+                <th>Quantidade</th>
                 <th>Validade</th>
                 <th>Desconto</th>
-                <th>Ação</th>
+                <th>Reserva</th>
             </tr>
             <?php foreach ($cupons as $row): ?>
                 <tr>
-                    <td><?php echo $row['num_cupom']; ?></td>
                     <td><?php echo htmlspecialchars($row['titulo']); ?></td>
                     <td><?php echo htmlspecialchars($row['nome_fantasia']); ?></td>
                     <td><?php echo htmlspecialchars($row['categoria']); ?></td>
-                    <td><?php echo $row['data_inicio'] . " até " . $row['data_termino']; ?></td>
+                    <td><?php echo htmlspecialchars($row['quantidade']); ?></td>
+                    <td>
+                        <?php 
+                            echo date("d-m-Y", strtotime($row['data_inicio'])) 
+                                 . " até " . 
+                                 date("d-m-Y", strtotime($row['data_termino'])); 
+                        ?>
+                    </td>
                     <td><?php echo $row['percentual_desc'] . "%"; ?></td>
                     <td>
                         <form method="POST" action="reservar.php">

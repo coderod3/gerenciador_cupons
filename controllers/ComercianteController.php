@@ -17,26 +17,48 @@ class ComercianteController {
         $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : '';
         $busca = isset($_GET['q']) ? "%".$_GET['q']."%" : null;
 
-        $sql = "SELECT * FROM cupom WHERE comercio_cnpj = ?";
+        // Buscar nome do associado (se não estiver na sessão)
+        if (!isset($_SESSION['nome_fantasia'])) {
+            $stmtNome = $this->conn->prepare("SELECT nome_fantasia FROM comercio WHERE cnpj = ?");
+            $stmtNome->bind_param("s", $cnpj);
+            $stmtNome->execute();
+            $resNome = $stmtNome->get_result()->fetch_assoc();
+            $_SESSION['nome_fantasia'] = $resNome ? $resNome['nome_fantasia'] : "Comerciante";
+        }
+
+        $sql = "SELECT 
+                    c.num_cupom,
+                    c.titulo,
+                    c.data_inicio,
+                    c.data_termino,
+                    c.percentual_desc,
+                    COALESCE(c.total, c.quantidade) AS total,
+                    GREATEST(COALESCE(c.total, c.quantidade) - c.quantidade, 0) AS utilizados,
+                    LEAST(c.quantidade, COALESCE(c.total, c.quantidade)) AS disponiveis
+                FROM cupom c
+                WHERE c.comercio_cnpj = ?";
         $params = [$cnpj];
         $types = "s";
 
         if ($busca) {
-            $sql .= " AND (titulo LIKE ? OR num_cupom LIKE ?)";
+            $sql .= " AND (c.titulo LIKE ? OR c.num_cupom LIKE ?)";
             $params[] = $busca;
             $params[] = $busca;
             $types .= "ss";
         }
 
+        // Filtros com base em quantidade (estoque atual)
         if ($filtro === 'ativos') {
-            $sql .= " AND CURDATE() BETWEEN data_inicio AND data_termino AND quantidade > 0";
-        } elseif ($filtro === 'utilizados') {
-            $sql .= " AND num_cupom IN (SELECT num_cupom FROM associado_cupom WHERE data_uso IS NOT NULL)";
+            $sql .= " AND CURDATE() BETWEEN c.data_inicio AND c.data_termino AND c.quantidade > 0";
+        } elseif ($filtro === 'esgotados') {
+            $sql .= " AND CURDATE() BETWEEN c.data_inicio AND c.data_termino AND c.quantidade = 0";
         } elseif ($filtro === 'vencidos') {
-            $sql .= " AND data_termino < CURDATE()";
+            $sql .= " AND c.data_termino < CURDATE()";
+        } elseif ($filtro === 'agendados') {
+            $sql .= " AND c.data_inicio > CURDATE()";
         }
 
-        $sql .= " ORDER BY data_inicio DESC, titulo";
+        $sql .= " ORDER BY c.data_inicio DESC, c.titulo";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param($types, ...$params);
@@ -52,6 +74,7 @@ class ComercianteController {
     }
 
 
+
     public function cadastrarCupom() {
         if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'comerciante') {
             header("Location: ../index.php");
@@ -65,10 +88,6 @@ class ComercianteController {
             $data_inicio = $_POST['data_inicio'];
             $data_termino = $_POST['data_termino'];
 
-            //teste
-            //var_dump($_POST['data_inicio'], $_POST['data_termino']);
-            //exit;
-
             try {
                 $dt_inicio = new DateTime($data_inicio);
                 $dt_termino = new DateTime($data_termino);
@@ -80,18 +99,17 @@ class ComercianteController {
 
             $percentual = floatval($_POST['percentual_desc']);
             $quantidade = intval($_POST['quantidade']);
-            $cnpj = $_SESSION['id']; // comerciante logado
+            $cnpj = $_SESSION['id'];
 
             if ($data_inicio <= $data_termino && $data_inicio >= date('Y-m-d')) {
-                // gera código hash de 12 caracteres
                 $num_cupom = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 12));
 
                 $stmt = $this->conn->prepare(
-                    "INSERT INTO cupom (num_cupom, comercio_cnpj, titulo, data_emissao, data_inicio, data_termino, percentual_desc, quantidade)
-                     VALUES (?, ?, ?, CURDATE(), ?, ?, ?, ?)"
+                    "INSERT INTO cupom (num_cupom, comercio_cnpj, titulo, data_emissao, data_inicio, data_termino, percentual_desc, quantidade, total)
+                    VALUES (?, ?, ?, CURDATE(), ?, ?, ?, ?, ?)"
                 );
-                $stmt->bind_param("sssssdi", $num_cupom, $cnpj, $titulo, $data_inicio, $data_termino, $percentual, $quantidade);
-
+                // s s s s s d i i
+                $stmt->bind_param("sssssdii", $num_cupom, $cnpj, $titulo, $data_inicio, $data_termino, $percentual, $quantidade, $quantidade);
 
                 if ($stmt->execute()) {
                     $msg = "Cupom cadastrado com sucesso!";
@@ -106,6 +124,8 @@ class ComercianteController {
         include __DIR__ . '/../views/comerciante/cadastrar_cupom.php';
     }
 
+
+
     // lista de cupons do comerciante
     public function meusCupons() {
         if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'comerciante') {
@@ -117,26 +137,38 @@ class ComercianteController {
         $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : '';
         $busca = isset($_GET['q']) ? "%".$_GET['q']."%" : null;
 
-        $sql = "SELECT * FROM cupom WHERE comercio_cnpj = ?";
+        $sql = "SELECT 
+                    c.num_cupom,
+                    c.titulo,
+                    c.data_inicio,
+                    c.data_termino,
+                    c.percentual_desc,
+                    COALESCE(c.total, c.quantidade) AS total,
+                    GREATEST(COALESCE(c.total, c.quantidade) - c.quantidade, 0) AS utilizados,
+                    LEAST(c.quantidade, COALESCE(c.total, c.quantidade)) AS disponiveis
+                FROM cupom c
+                WHERE c.comercio_cnpj = ?";
         $params = [$cnpj];
         $types = "s";
 
         if ($busca) {
-            $sql .= " AND (titulo LIKE ? OR num_cupom LIKE ?)";
+            $sql .= " AND (c.titulo LIKE ? OR c.num_cupom LIKE ?)";
             $params[] = $busca;
             $params[] = $busca;
             $types .= "ss";
         }
 
         if ($filtro === 'ativos') {
-            $sql .= " AND CURDATE() BETWEEN data_inicio AND data_termino AND quantidade > 0";
-        } elseif ($filtro === 'utilizados') {
-            $sql .= " AND num_cupom IN (SELECT num_cupom FROM associado_cupom WHERE data_uso IS NOT NULL)";
+            $sql .= " AND CURDATE() BETWEEN c.data_inicio AND c.data_termino AND c.quantidade > 0";
+        } elseif ($filtro === 'esgotados') {
+            $sql .= " AND CURDATE() BETWEEN c.data_inicio AND c.data_termino AND c.quantidade = 0";
         } elseif ($filtro === 'vencidos') {
-            $sql .= " AND data_termino < CURDATE()";
+            $sql .= " AND c.data_termino < CURDATE()";
+        } elseif ($filtro === 'agendados') {
+            $sql .= " AND c.data_inicio > CURDATE()";
         }
 
-        $sql .= " ORDER BY data_inicio DESC, titulo";
+        $sql .= " ORDER BY c.data_inicio DESC, c.titulo";
 
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param($types, ...$params);
@@ -150,6 +182,7 @@ class ComercianteController {
 
         include __DIR__ . '/../views/comerciante/meus_cupons.php';
     }
+
 
     public function validarCupom() {
         if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'comerciante') {
