@@ -24,7 +24,7 @@
         <input type="date" id="data_termino" name="data_termino" required><br><br>
 
         <label for="percentual_desc">Percentual de desconto (%):</label><br>
-        <input type="number" id="percentual_desc" name="percentual_desc" step="0.01" min="1" max="100" required><br><br>
+        <input type="number" id="percentual_desc" name="percentual_desc" step="1" min="1" max="100" required><br><br>
 
         <label for="quantidade">Quantidade de cupons:</label><br>
         <input type="number" id="quantidade" name="quantidade" min="1" required><br><br>

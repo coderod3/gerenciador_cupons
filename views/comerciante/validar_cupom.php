@@ -9,7 +9,7 @@
     <h2>Validar Cupom de Associado</h2>
     <p><a href="home.php">Voltar</a> | <a href="../logout.php">Sair</a></p>
 
-    <!-- formulário de busca por código -->
+    <!-- busca por código -->
     <form id="formBusca" method="GET" action="../../public/comercio/validar_cupom.php">
         <label for="codigo">Digite o código de reserva apresentado pelo associado:</label><br>
         <input type="text" id="codigo" name="codigo" required
@@ -17,7 +17,7 @@
         <button type="submit">Buscar</button>
     </form>
 
-    <!-- bloco de resultado sendo atualizado com ajax -->
+    <!-- bloco de resultado com ajax -->
     <div id="resultado">
         <?php if (!empty($msg)): ?>
             <p style="color:<?php echo (strpos($msg, 'sucesso') !== false) ? 'green' : 'red'; ?>">
@@ -32,8 +32,9 @@
                 <tr><th>Título</th><td><?php echo htmlspecialchars($cupom['titulo']); ?></td></tr>
                 <tr><th>Associado</th><td><?php echo htmlspecialchars($cupom['nome']); ?></td></tr>
                 <tr><th>Comércio</th><td><?php echo htmlspecialchars($cupom['nome_fantasia']); ?></td></tr>
-                <tr><th>Validade</th><td><?php echo $cupom['data_inicio'] . " até " . $cupom['data_termino']; ?></td></tr>
-                <tr><th>Data da Reserva</th><td><?php echo $cupom['data_reserva']; ?></td></tr>
+                <tr><th>Validade</th><td><?php echo date("d-m-Y", strtotime($cupom['data_inicio']))
+                 . " até " . date("d-m-Y", strtotime($cupom['data_termino'])); ?></td></tr>
+                <tr><th>Data da Reserva</th><td><?php echo date("d-m-Y", strtotime($cupom['data_reserva'])); ?></td></tr>
                 <tr><th>Status</th>
                     <td>
                         <?php

@@ -15,6 +15,15 @@ class AssociadoController {
         $cpf = $_SESSION['id'];
         $categoria_id = isset($_GET['categoria']) ? intval($_GET['categoria']) : 0;
 
+        // buscar nome do associado (se não estiver na sessão)
+        if (!isset($_SESSION['nome'])) {
+            $stmtNome = $this->conn->prepare("SELECT nome FROM associado WHERE cpf = ?");
+            $stmtNome->bind_param("s", $cpf);
+            $stmtNome->execute();
+            $resNome = $stmtNome->get_result()->fetch_assoc();
+            $_SESSION['nome'] = $resNome ? $resNome['nome'] : "Associado";
+        }
+
         // Carregar categorias
         $categorias = [];
         $resCat = $this->conn->query("SELECT id, nome FROM categoria ORDER BY nome");
@@ -22,7 +31,7 @@ class AssociadoController {
             $categorias[] = $row;
         }
 
-        // query
+        // query de cupons disponíveis
         $sql = "SELECT c.num_cupom, c.titulo, c.data_inicio, c.data_termino, c.percentual_desc,
                     com.nome_fantasia, cat.nome AS categoria, c.quantidade
                 FROM cupom c
@@ -34,7 +43,6 @@ class AssociadoController {
                     SELECT num_cupom FROM associado_cupom WHERE associado_cpf = ?
                 )";
 
-        // se tiver filtro de categoria, adiciona mais um parâmetro
         $params = ["s", $cpf];
         if ($categoria_id > 0) {
             $sql .= " AND com.categoria_id = ?";
@@ -44,7 +52,6 @@ class AssociadoController {
 
         $sql .= " ORDER BY c.data_inicio DESC, c.titulo";
 
-        // roda a query
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param(...$params);
         $stmt->execute();
@@ -126,6 +133,7 @@ class AssociadoController {
 
         $cpf = $_SESSION['id'];
         $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : 'ativos';
+        $categoria_id = isset($_GET['categoria']) ? intval($_GET['categoria']) : 0;
 
         $sql = "SELECT ac.id, ac.data_reserva, ac.data_uso, ac.codigo_reserva,
                     c.num_cupom, c.titulo, c.data_inicio, c.data_termino, 
@@ -142,12 +150,24 @@ class AssociadoController {
             $sql .= " AND ac.data_uso IS NOT NULL";
         } elseif ($filtro === 'vencidos') {
             $sql .= " AND ac.data_uso IS NULL AND c.data_termino < CURDATE()";
+        } elseif ($filtro === 'todos') {
+            // não adiciona filtro extra
+        }
+
+        if ($categoria_id > 0) {
+            $sql .= " AND com.categoria_id = ?";
         }
 
         $sql .= " ORDER BY c.data_inicio DESC";
 
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("s", $cpf);
+
+        if ($categoria_id > 0) {
+            $stmt->bind_param("si", $cpf, $categoria_id);
+        } else {
+            $stmt->bind_param("s", $cpf);
+        }
+
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -156,6 +176,15 @@ class AssociadoController {
             $meus_cupons[] = $row;
         }
 
+        // Carregar categorias para dropdown
+        $categorias = [];
+        $resCat = $this->conn->query("SELECT id, nome FROM categoria ORDER BY nome");
+        while ($row = $resCat->fetch_assoc()) {
+            $categorias[] = $row;
+        }
+
         include __DIR__ . '/../views/associado/meus_cupons.php';
     }
+
+
 }

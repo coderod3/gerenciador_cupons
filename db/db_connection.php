@@ -8,7 +8,7 @@
         exit();
     }
 
-    $db = "descontos";
+    $db = "gerenciador_cupons";
 
     // cria o banco de dados
     $sql = "CREATE DATABASE IF NOT EXISTS $db";
