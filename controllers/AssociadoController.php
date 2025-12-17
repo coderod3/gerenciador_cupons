@@ -24,7 +24,7 @@ class AssociadoController {
             $_SESSION['nome'] = $resNome ? $resNome['nome'] : "Associado";
         }
 
-        // Carregar categorias
+        // carregar categorias
         $categorias = [];
         $resCat = $this->conn->query("SELECT id, nome FROM categoria ORDER BY nome");
         while ($row = $resCat->fetch_assoc()) {
@@ -176,7 +176,7 @@ class AssociadoController {
             $meus_cupons[] = $row;
         }
 
-        // Carregar categorias para dropdown
+        // carregar categorias para dropdown
         $categorias = [];
         $resCat = $this->conn->query("SELECT id, nome FROM categoria ORDER BY nome");
         while ($row = $resCat->fetch_assoc()) {
@@ -186,5 +186,64 @@ class AssociadoController {
         include __DIR__ . '/../views/associado/meus_cupons.php';
     }
 
+    public function editarPerfil() {
+        // verificar se é associado
+        if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'associado') {
+            header("Location: ../index.php");
+            exit;
+        }
+
+        $cpf = $_SESSION['id'];
+        $msg = null;
+
+        // rsalvar
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nome = $_POST['nome'];
+            $email = $_POST['email'];
+            $celular = $_POST['celular'];
+            $data_nascimento = $_POST['data_nascimento'];
+            
+            $cep = $_POST['cep'];
+            $uf = $_POST['uf'];
+            $cidade = $_POST['cidade'];
+            $bairro = $_POST['bairro'];
+            $endereco = $_POST['endereco'];
+
+            // query de atualização (CPF não muda)
+            $sql = "UPDATE associado SET 
+                        nome = ?, email = ?, celular = ?, data_nascimento = ?, 
+                        cep = ?, uf = ?, cidade = ?, bairro = ?, endereco = ? 
+                    WHERE cpf = ?";
+            
+            $stmt = $this->conn->prepare($sql);
+
+            $stmt->bind_param("ssssssssss", 
+                $nome, $email, $celular, $data_nascimento, 
+                $cep, $uf, $cidade, $bairro, $endereco, $cpf
+            );
+
+            if ($stmt->execute()) {
+                $msg = "Perfil atualizado com sucesso!";
+                $_SESSION['nome'] = $nome; // atualiza o nome no header
+            } else {
+                $msg = "Erro ao atualizar: " . $stmt->error;
+            }
+            $stmt->close();
+        }
+
+        // buscar dados atuais
+        $stmtGet = $this->conn->prepare("SELECT * FROM associado WHERE cpf = ?");
+        $stmtGet->bind_param("s", $cpf);
+        $stmtGet->execute();
+        $res = $stmtGet->get_result();
+        $associado = $res->fetch_assoc();
+        $stmtGet->close();
+
+        if (!$associado) {
+            die("Erro: Associado não encontrado.");
+        }
+
+        include __DIR__ . '/../views/associado/perfil.php';
+    }
 
 }

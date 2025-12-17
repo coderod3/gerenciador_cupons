@@ -17,7 +17,7 @@ class ComercianteController {
         $filtro = isset($_GET['filtro']) ? $_GET['filtro'] : '';
         $busca = isset($_GET['q']) ? "%".$_GET['q']."%" : null;
 
-        // Buscar nome do associado (se não estiver na sessão)
+        // buscar nome do associado
         if (!isset($_SESSION['nome_fantasia'])) {
             $stmtNome = $this->conn->prepare("SELECT nome_fantasia FROM comercio WHERE cnpj = ?");
             $stmtNome->bind_param("s", $cnpj);
@@ -27,16 +27,14 @@ class ComercianteController {
         }
 
         $sql = "SELECT 
-                    c.num_cupom,
-                    c.titulo,
-                    c.data_inicio,
-                    c.data_termino,
-                    c.percentual_desc,
+                    c.num_cupom, c.titulo, c.data_inicio, c.data_termino, c.percentual_desc,
                     COALESCE(c.total, c.quantidade) AS total,
-                    GREATEST(COALESCE(c.total, c.quantidade) - c.quantidade, 0) AS utilizados,
-                    LEAST(c.quantidade, COALESCE(c.total, c.quantidade)) AS disponiveis
+                    GREATEST(COALESCE(c.total, c.quantidade) - c.quantidade, 0) AS reservados,
+                    LEAST(c.quantidade, COALESCE(c.total, c.quantidade)) AS disponiveis,
+                    (SELECT COUNT(*) FROM associado_cupom ac WHERE ac.num_cupom = c.num_cupom AND ac.data_uso IS NOT NULL) AS utilizados
                 FROM cupom c
                 WHERE c.comercio_cnpj = ?";
+        
         $params = [$cnpj];
         $types = "s";
 
@@ -47,7 +45,6 @@ class ComercianteController {
             $types .= "ss";
         }
 
-        // Filtros com base em quantidade (estoque atual)
         if ($filtro === 'ativos') {
             $sql .= " AND CURDATE() BETWEEN c.data_inicio AND c.data_termino AND c.quantidade > 0";
         } elseif ($filtro === 'esgotados') {
@@ -74,8 +71,9 @@ class ComercianteController {
     }
 
 
-
     public function cadastrarCupom() {
+        date_default_timezone_set('America/Sao_Paulo');
+
         if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'comerciante') {
             header("Location: ../index.php");
             exit;
@@ -117,7 +115,7 @@ class ComercianteController {
                     $msg = "Erro ao cadastrar cupom: " . $this->conn->error;
                 }
             } else {
-                $msg = "Período inválido. Data início deve ser hoje ou futura e anterior à data término.";
+                $msg = "Período inválido. Data início deve ser hoje ou futura e anterior a data término.";
             }
         }
 
@@ -246,4 +244,72 @@ class ComercianteController {
         include __DIR__ . '/../views/comerciante/validar_cupom.php';
     }
 
+    public function editarPerfil() {
+
+        if (!isset($_SESSION['perfil']) || $_SESSION['perfil'] !== 'comerciante') {
+            header("Location: ../index.php");
+            exit;
+        }
+
+        $cnpj = $_SESSION['id'];
+        $msg = null;
+
+        // salvar
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $nome_fantasia = $_POST['nome_fantasia'];
+            $email = $_POST['email'];
+            $contato = $_POST['contato'];
+            $categoria_id = !empty($_POST['categoria_id']) ? $_POST['categoria_id'] : null;
+            
+            $cep = $_POST['cep'];
+            $uf = $_POST['uf'];
+            $cidade = $_POST['cidade'];
+            $bairro = $_POST['bairro'];
+            $endereco = $_POST['endereco'];
+
+            $sql = "UPDATE comercio SET 
+                        nome_fantasia = ?, email = ?, contato = ?, categoria_id = ?, 
+                        cep = ?, uf = ?, cidade = ?, bairro = ?, endereco = ? 
+                    WHERE cnpj = ?";
+            
+            $stmt = $this->conn->prepare($sql);
+
+            $stmt->bind_param("sssissssss", 
+                $nome_fantasia, $email, $contato, $categoria_id, 
+                $cep, $uf, $cidade, $bairro, $endereco, $cnpj
+            );
+
+            if ($stmt->execute()) {
+                $msg = "Perfil atualizado com sucesso!";
+                $_SESSION['nome_fantasia'] = $nome_fantasia;
+            } else {
+                $msg = "Erro ao atualizar: " . $stmt->error;
+            }
+            $stmt->close();
+        }
+
+        //buscar dados atuais
+        $stmtGet = $this->conn->prepare("SELECT * FROM comercio WHERE cnpj = ?");
+        $stmtGet->bind_param("s", $cnpj);
+        $stmtGet->execute();
+        $res = $stmtGet->get_result();
+        $comerciante = $res->fetch_assoc();
+        $stmtGet->close();
+
+        if (!$comerciante) {
+            $msg = "Erro: Dados não encontrados.";
+        }
+
+        $categorias = [];
+        $resCat = $this->conn->query("SELECT id, nome FROM categoria ORDER BY nome");
+        
+        if ($resCat) {
+            while ($row = $resCat->fetch_assoc()) {
+                $categorias[] = $row;
+            }
+        }
+
+        // chama view
+        include __DIR__ . '/../views/comerciante/perfil.php';
+    }
 }

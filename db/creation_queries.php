@@ -94,7 +94,7 @@ $queries = [
 
     // Inserts associado
     "INSERT INTO associado (cpf, nome, data_nascimento, celular, email, senha_hash, endereco, bairro, cidade, uf, cep) VALUES
-      ('111.222.333-44', 'Lucas Silva', '1998-05-12', '11 90000-0001', 'raraujo952.ra24@gmail.com', '\$2y\$10\$E6SS79DaMeo8M/mPfaJtueSTf15IhhblVSSG8hVvBLS6F.zfaNsdO', 'Rua A, 123', 'Centro', 'Dumont', 'SP', '14000-000'),
+      ('111.222.333-44', 'Lucas Silva', '1998-05-12', '11 90000-0001', 'focusgo.qtp@gmail.com', '\$2y\$10\$E6SS79DaMeo8M/mPfaJtueSTf15IhhblVSSG8hVvBLS6F.zfaNsdO', 'Rua A, 123', 'Centro', 'Dumont', 'SP', '14000-000'),
       ('555.666.777-88', 'Mariana Souza', '1995-09-30', '11 90000-0002', 'mariana@example.com', '\$2y\$10\$J1x696N.Zz6y69SO4qPtUedMdnXE87Q9rchdLYE.Sk2ONa1hreLei', 'Av. B, 456', 'Jardins', 'São Paulo', 'SP', '01000-000'),
       ('999.000.111-22', 'João Pereira', '2000-01-20', '11 90000-0003', 'joao@example.com', '\$2y\$10\$gnolgg93Y1UZTRIRKookf.8YdSKzqrcahvSv4iRBFnlRSKYgz4r7e', 'Rua C, 789', 'Centro', 'Ribeirão Preto', 'SP', '14010-000')
     ON DUPLICATE KEY UPDATE nome = VALUES(nome), email = VALUES(email)",

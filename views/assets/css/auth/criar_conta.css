@@ -1,0 +1,259 @@
+/* reset base simples */
+* { margin: 0;
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #3c49dacc 0%, #007bff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* container principal main */
+.main-wrapper {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    transition: max-width 0.3s ease;
+}
+
+/* expande quando formulario aparece */
+.main-wrapper.expanded {
+    max-width: 800px;
+}
+
+.header-box {
+    text-align: center;
+    padding: 2rem 2rem 1rem;
+}
+
+.header-box h2 {
+    color: #2c3e50;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.back-link {
+    color: #666;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover { color: #007bff; }
+
+/* seleção de perfil */
+.profile-selector {
+    display: flex;
+    gap: 1rem;
+    padding: 0 2rem 2rem;
+    justify-content: center;
+}
+
+.profile-option {
+    position: relative;
+    flex: 1;
+}
+
+.profile-option input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #555;
+    height: 100%;
+}
+
+.profile-card:hover {
+    border-color: #b3d7ff;
+    background: #f8f9fa;
+}
+
+.profile-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.profile-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+/* estado selecionado */
+.profile-option input:checked + .profile-card {
+    border-color: #007bff;
+    background: #e7f1ff;
+    color: #007bff;
+}
+
+/* area do formulario */
+.form-container {
+    display: none;
+    padding: 0 2rem 2rem;
+    background: #fff;
+    animation: slideDown 0.4s ease forwards;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+h3 {
+    grid-column: 1 / -1;
+    font-size: 1rem;
+    color: #007bff;
+    margin: 1rem 0 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+}
+
+/* texto de ajuda em baixo do select */
+.input-helper {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: -0.5rem;
+    margin-bottom: 2rem;
+    line-height: 1.4;
+
+    /* alinhamento */
+    grid-column: 2;
+    text-align: right;
+    margin-right: 4px;
+    width: 100%;
+}
+
+.input-helper a {
+    color: #666;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.input-helper a:hover {
+    color: #007bff;
+}
+
+
+
+/* responsividade */
+@media (max-width: 768px) {
+    .input-helper {
+        grid-column: auto;
+        margin-bottom: 1.5rem;
+    }
+}
+
+
+/* rodapé interno do cartão */
+.auth-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-top: 1px solid #f1f3f5;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.auth-footer a {
+    color: #666;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.auth-footer a:hover {
+    color: #007bff;
+}
+
+
+/* inputs */
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.full-width { grid-column: 1 / -1; }
+
+input, select {
+    padding: 0.6rem 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+    width: 100%;
+    background: #fdfdfd;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #007bff;
+    background: #fff;
+}
+
+::placeholder { color: #aaa; }
+
+button[type="submit"] {
+    grid-column: 1 / -1;
+    margin-top: 1.5rem;
+    padding: 0.8rem;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button[type="submit"]:hover {
+    background: #0056b3;
+}
+
+/* mensagens */
+.message {
+    margin: 1rem 2rem;
+    padding: 0.8rem;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+.success { background: #d4edda; color: #155724; }
+.error { background: #f8d7da; color: #721c24; }
+
+/* mobile */
+@media (max-width: 600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .profile-selector { flex-direction: column; }
+    .main-wrapper.expanded { max-width: 100%; }
+}

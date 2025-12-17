@@ -1,0 +1,174 @@
+/* Base */
+* { margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #3c49dacc 0%, #007bff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* cartão principal */
+.card-wrapper {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    text-align: center;
+    animation: floatIn 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* decoração topo */
+.card-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #4f46e5, #818cf8);
+}
+
+@keyframes floatIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* icone de chave */
+.icon-key {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef2ff;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.1);
+    vertical-align: middle;
+}
+
+.icon-key img {
+    width: 48px;
+    height: 48px;
+}
+
+h2 {
+    color: #1f2937;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+p.subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+/* Inputs */
+.input-group {
+    margin-bottom: 1.2rem;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: 4px;
+}
+
+input[type="password"] {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 2px solid #f3f4f6;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    color: #1f2937;
+    background: #f9fafb;
+}
+
+input[type="password"]:focus {
+    background: #fff;
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* validação (bordas) */
+input:valid { border-color: #e5e7eb; }
+input:invalid:focus { border-color: #f87171; }
+
+/* botao */
+.btn-submit {
+    background: #4f46e5;
+    color: white;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 1rem;
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+}
+
+.btn-submit:hover {
+    background: #4338ca;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+}
+
+/* msgs de erro/status */
+.msg-box {
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.msg-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* dicas de senha */
+.password-hint {
+    font-size: 0.8rem;
+    color: #9ca3af;
+    text-align: left;
+    margin-top: 0.2rem;
+    margin-left: 4px;
+}
+
+/* link de erro (voltar) */
+.error-action-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #4f46e5;
+    font-weight: 600;
+    text-decoration: none;
+}

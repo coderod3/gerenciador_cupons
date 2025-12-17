@@ -1,0 +1,165 @@
+/* Base */
+* { 
+    margin: 0;
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #3c49dacc 0%, #007bff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* cartão principal */
+.card-wrapper {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    text-align: center;
+    animation: floatIn 0.5s ease-out;
+}
+
+@keyframes floatIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* roda pe interno do cartão */
+.auth-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-top: 1px solid #f1f3f5;
+    text-align: center;
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.auth-footer a {
+    color: #666;
+    text-decoration: none;  /* sem grifar */
+    font-weight: 600;
+    transition: color 0.2s ease;
+}
+
+.auth-footer a:hover {
+    color: #007bff;
+}
+
+/* icone de email/codigo */
+.icon-mail {
+    margin-bottom: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    /* background: #eef2ff;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.1); */
+    vertical-align: middle;
+}
+
+.icon-mail img {
+    width: 48px;
+    height: 48px;
+}
+
+h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+p.subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+    text-align: center;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 0.9rem;
+    border: 2px solid #f3f4f6;
+    border-radius: 12px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.5rem;
+    text-align: center;
+    transition: all 0.2s;
+    color: #1f2937;
+    background: #f9fafb;
+    text-transform: uppercase;
+}
+
+input[type="text"]:focus {
+    background: #fff;
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* botao */
+.btn-submit {
+    background: #4f46e5;
+    color: white;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-submit:hover {
+    background: #4338ca;
+    transform: translateY(-1px);
+}
+
+/* mensagens */
+.msg-success {
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #a7f3d0;
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 1.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.back-link:hover { color: #1f2937; }

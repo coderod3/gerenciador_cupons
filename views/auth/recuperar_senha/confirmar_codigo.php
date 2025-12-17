@@ -1,26 +1,46 @@
 <?php
-// Exibe mensagem passada via GET (ex.: "Email enviado!")
-$msg = $_GET['msg'] ?? null;
+    // mensagem passada ex email enviado
+    $msg = $_GET['msg'] ?? null;
 ?>
 
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
+    <?php include __DIR__ . '../../../shared/head-icons.php'; ?>
+
     <title>Confirmar Código</title>
+    <link rel="stylesheet" href="../views/assets/css/auth/recuperar_senha/confirmar_codigo.css">
 </head>
 <body>
-    <h2>Confirmação de Código</h2>
 
-    <?php if ($msg): ?>
-        <p style="color: green;"><?php echo htmlspecialchars($msg); ?></p>
-    <?php endif; ?>
+    <div class="card-wrapper">
+        <div class="icon-mail">
+            <img src="https://cdn-icons-png.flaticon.com/512/5089/5089889.png" alt="envelope" >
+        </div>
 
-    <form method="POST" action="../../../public/recuperar_senha.php?action=confirmarCodigo">
-        <label for="codigo">Digite o código recebido:</label>
-        <input type="text" name="codigo" id="codigo" maxlength="6" required>
+        <h2>Verifique seu E-mail</h2>
+        <p class="subtitle">Enviamos um código de 6 dígitos para o seu e-mail. Digite-o abaixo para continuar.</p>
 
-        <button type="submit">Validar</button>
-    </form>
+        <?php if ($msg): ?>
+            <div class="msg-success">
+                <?php echo htmlspecialchars($msg); ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="">
+            
+            <div class="input-group">
+                <label for="codigo">Código de Verificação</label>
+                <input type="text" name="codigo" id="codigo" maxlength="6" required placeholder="000000" autocomplete="off">
+            </div>
+
+            <button type="submit" class="btn-submit">Validar Código</button>
+        </form>
+        <div class="auth-footer">
+            Precisa de ajuda? <a href="mailto:suporte.cupomapp@gmail.com">Fale com o suporte</a>
+        </div>
+        <a href="../public" class="back-link">Voltar / Reenviar</a>
+    </div>
+
 </body>
 </html>

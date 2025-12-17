@@ -24,11 +24,11 @@ class RecuperarSenhaController {
                 $msg = "Se o e-mail existir, você receberá instruções.";
             }
 
-            header("Location: ../../views/auth/recuperar_senha/confirmar_codigo.php?msg=" . urlencode($msg));
+            header("Location: recuperar_senha.php?action=confirmarCodigo&msg=" . urlencode($msg));
             exit;
         }
 
-        include __DIR__ . '../../views/auth/recuperar_senha/solicitar_email.php';
+        include __DIR__ . '/../views/auth/recuperar_senha/solicitar_email.php';
     }
 
     private function criarSolicitacaoReset($email, $tipo) {
@@ -46,7 +46,7 @@ class RecuperarSenhaController {
             return null;
         }
 
-        // Código simples de 6 dígitos
+        // código simples de 6 dígitos
         $chave = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
         $vence_em = date("Y-m-d H:i:s", strtotime("+30 minutes"));
 
@@ -66,31 +66,50 @@ class RecuperarSenhaController {
         $mail = new PHPMailer(true);
 
         try {
+            // configurações do servidor (gmails)
             $mail->isSMTP();
-            $mail->Host       = 'smtp.mailgun.org';
+            $mail->Host       = 'smtp.gmail.com'; 
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'cupomapp@sandboxd0ada5c752a04de99456256cf398882e.mailgun.org';
-            $mail->Password   = '1eb7d4fd92498c1fd5b0789e2616ee6b-e80d8b76-2946041e';
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            $mail->Port       = 587;
+            $mail->Username   = 'suporte.cupomapp@gmail.com';
+            $mail->Password   = 'ltfd tpee yzte zgiu';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // obrigatório para gmail na porta 587
+            $mail->Port       = 587; 
             $mail->CharSet    = 'UTF-8';
 
-            $mail->setFrom('cupomapp@sandboxd0ada5c752a04de99456256cf398882e.mailgun.org', 'Suporte');
+            // destinatários
+            $mail->setFrom('suporte.cupomapp@gmail.com', 'Suporte CupomApp');
             $mail->addAddress($email, $nome);
 
+            // conteúdo email
             $mail->isHTML(true);
-            $mail->Subject = 'Recuperação de senha';
-            $mail->Body    = "<p>Olá " . htmlspecialchars($nome) . ",</p>"
-                           . "<p>Você solicitou redefinição de senha. Use o código abaixo:</p>"
-                           . "<h2 style='color:blue;'>" . htmlspecialchars($chave) . "</h2>"
-                           . "<p>Este código expira em 30 minutos.</p>"
-                           . "<p>Se não foi você, ignore este e-mail.</p>";
-            $mail->AltBody = "Olá {$nome}\n\nVocê solicitou redefinição de senha. Use o código: {$chave}\n\nEste código expira em 30 minutos.";
+            $mail->Subject = 'Recuperação de Senha - CupomApp';
+            
+            // corpo do email
+            $mail->Body    = "
+            <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;'>
+                <h2 style='color: #2c3e50; text-align: center;'>CupomApp</h2>
+                <hr style='border: 0; border-top: 1px solid #eee;'>
+                <p>Olá, <strong>" . htmlspecialchars($nome) . "</strong>!</p>
+                <p>Recebemos uma solicitação para redefinir a senha da sua conta.</p>
+                <p>Seu código de verificação é:</p>
+                <div style='text-align: center; margin: 20px 0;'>
+                    <span style='font-size: 24px; font-weight: bold; color: #ffffff; background-color: #007bff; padding: 10px 20px; border-radius: 5px; letter-spacing: 2px;'>
+                        " . htmlspecialchars($chave) . "
+                    </span>
+                </div>
+                <p>Este código expira em 30 minutos.</p>
+                <p style='font-size: 12px; color: #777;'>Se você não solicitou esta alteração, por favor ignore este e-mail. Nenhuma alteração será feita em sua conta.</p>
+                <hr style='border: 0; border-top: 1px solid #eee; margin-top: 20px;'>
+                <p style='text-align: center; font-size: 11px; color: #aaa;'>&copy; " . date('Y') . " CupomApp. Todos os direitos reservados.</p>
+            </div>";
+
+            // texto alternativo sem o html (para clientes antigos)
+            $mail->AltBody = "Olá {$nome},\n\nRecebemos uma solicitação para redefinir sua senha no CupomApp.\nSeu código de verificação é: {$chave}\n\nEste código expira em 30 minutos.\nSe você não solicitou isso, ignore este e-mail.";
 
             $mail->send();
             return true;
         } catch (Exception $e) {
-            error_log('Erro ao enviar e-mail: ' . $e->getMessage());
+            // error_log('Erro PHPMailer: ' . $mail->ErrorInfo); 
             return false;
         }
     }
@@ -109,22 +128,22 @@ class RecuperarSenhaController {
             $result = $stmt->get_result()->fetch_assoc();
 
             if ($result) {
-                // Marca como usado
+                // marca como usado
                 $stmtUpd = $this->conn->prepare("UPDATE recuperar_senha SET usado = 1 WHERE id = ?");
                 $stmtUpd->bind_param("i", $result['id']);
                 $stmtUpd->execute();
 
-                // Redireciona para tela de redefinição de senha
-                header("Location: ../views/auth/recuperar_senha/nova_senha.php?identificador=" . urlencode($result['identificador']));
+                // redireciona para tela de redefinição de senha
+                header("Location: recuperar_senha.php?action=definirNovaSenha&identificador=" . urlencode($result['identificador']));
                 exit;
             } else {
                 $msg = "Código inválido ou expirado.";
-                header("Location: ../../views/auth/recuperar_senha/confirmar_codigo.php?msg=" . urlencode($msg));
+                header("Location: recuperar_senha.php?action=confirmarCodigo&msg=" . urlencode($msg));
                 exit;
             }
         }
 
-        include __DIR__ . '../../views/auth/recuperar_senha/confirmar_codigo.php';
+        include __DIR__ . '/../views/auth/recuperar_senha/confirmar_codigo.php';
     }
 
     public function definirNovaSenha() {
@@ -135,15 +154,15 @@ class RecuperarSenhaController {
 
         if ($senha !== $confirmar) {
             $msg = "As senhas não coincidem.";
-            header("Location: ../../views/auth/recuperar_senha/nova_senha.php?identificador=" 
+            header("Location: recuperar_senha.php?action=definirNovaSenha&identificador=" 
                 . urlencode($identificador) . "&msg=" . urlencode($msg));
             exit;
         }
 
-        // Criptografa a nova senha
+        // criptografa a nova senha
         $hash = password_hash($senha, PASSWORD_DEFAULT);
 
-        // Tenta atualizar em associado
+        // tenta atualizar em associado
         $stmt = $this->conn->prepare("UPDATE associado SET senha_hash = ? WHERE cpf = ?");
         $stmt->bind_param("ss", $hash, $identificador);
         $stmt->execute();
@@ -156,7 +175,7 @@ class RecuperarSenhaController {
         }
 
         $msg = "Senha redefinida com sucesso! Agora você já pode fazer login.";
-        header("Location: ../../views/auth/recuperar_senha/sucesso.php?msg=" . urlencode($msg));
+        header("Location: ../views/auth/recuperar_senha/sucesso.php?msg=" . urlencode($msg));
         exit;
 
     }

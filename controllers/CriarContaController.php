@@ -23,7 +23,9 @@ class CriarContaController {
             $senha = $_POST['senha'];
             $confirmar = $_POST['confirmar_senha'];
 
-            if ($senha !== $confirmar) {
+            if (strlen($senha) < 6) {
+                $msg = "A senha deve ter no mínimo 6 caracteres.";
+            } elseif ($senha !== $confirmar) {
                 $msg = "As senhas não conferem.";
             } else {
                 $senha_hash = password_hash($senha, PASSWORD_DEFAULT);
@@ -40,9 +42,13 @@ class CriarContaController {
                     $uf = $_POST['uf'];
                     $cep = $_POST['cep'];
 
-                    // ---- VALIDAÇÃO CPF ----
+
                     if (!$this->validarCPF($cpf)) {
                         $msg = "CPF inválido.";
+                    } elseif ($this->usuarioExiste('associado', 'cpf', $cpf)) {
+                        $msg = "Este CPF já possui cadastro.";
+                    } elseif ($this->usuarioExiste('associado', 'email', $email)) {
+                        $msg = "Este e-mail já está cadastrado.";
                     } else {
                         $stmt = $this->conn->prepare(
                             "INSERT INTO associado (cpf, nome, data_nascimento, celular, email, senha_hash, endereco, bairro, cidade, uf, cep)
@@ -51,7 +57,7 @@ class CriarContaController {
                         $stmt->bind_param("sssssssssss", $cpf, $nome, $data_nascimento, $celular, $email, $senha_hash, $endereco, $bairro, $cidade, $uf, $cep);
 
                         if ($stmt->execute()) {
-                            $msg = "Conta de associado criada com sucesso!";
+                            $msg = "Conta de associado criada com sucesso! Clique em Entrar.";
                         } else {
                             $msg = "Erro ao criar conta de associado: " . $this->conn->error;
                         }
@@ -70,9 +76,13 @@ class CriarContaController {
                     $cep = $_POST['cep'];
                     $categoria_id = intval($_POST['categoria_id']);
 
-                    // ---- VALIDAÇÃO CNPJ ----
+
                     if (!$this->validarCNPJ($cnpj)) {
                         $msg = "CNPJ inválido.";
+                    } elseif ($this->usuarioExiste('comercio', 'cnpj', $cnpj)) {
+                        $msg = "Este CNPJ já possui cadastro.";
+                    } elseif ($this->usuarioExiste('comercio', 'email', $email)) {
+                        $msg = "Este e-mail já está cadastrado.";
                     } else {
                         $stmt = $this->conn->prepare(
                             "INSERT INTO comercio (cnpj, razao_social, nome_fantasia, email, senha_hash, contato, endereco, bairro, cidade, uf, cep, categoria_id)
@@ -96,12 +106,32 @@ class CriarContaController {
         include __DIR__ . '/../views/auth/criar_conta.php';
     }
 
+    private function usuarioExiste($tabela, $campo, $valor) {
+        $tabelasPermitidas = ['associado', 'comercio'];
+        $camposPermitidos = ['cpf', 'cnpj', 'email'];
 
+        if (!in_array($tabela, $tabelasPermitidas) || !in_array($campo, $camposPermitidos)) {
+            return false;
+        }
+
+        $sql = "SELECT 1 FROM $tabela WHERE $campo = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $valor);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        $existe = ($stmt->num_rows > 0);
+        $stmt->close();
+        
+        return $existe;
+    }
 
     // metodos de validação
 
     private function validarCPF(string $cpf): bool {
+        //remove caracteres não numéricos antes de validar
         $cpf = preg_replace('/\D/', '', $cpf);
+        
         if (strlen($cpf) != 11) return false;
         if (preg_match('/^(\d)\1{10}$/', $cpf)) return false;
 
@@ -124,19 +154,18 @@ class CriarContaController {
         return $cpf[10] == $dv2;
     }
 
-
-
     private function validarCNPJ(string $cnpj): bool {
-        $cnpj = preg_replace('/[^0-9A-Za-z]/', '', $cnpj);
+        // remove caracteres não numéricos antes de validar
+        $cnpj = preg_replace('/[^0-9]/', '', $cnpj); // remover tudo que não é número
+        
         if (strlen($cnpj) != 14) return false;
 
-        $cnpj = strtoupper($cnpj);
-
-        if (preg_match('/^([0-9A-Z])\1{13}$/', $cnpj)) return false;
+        // verifica sequência repetida (ex: 11.111.111/1111-11)
+        if (preg_match('/^(\d)\1{13}$/', $cnpj)) return false;
 
         $valores = [];
         for ($i = 0; $i < 14; $i++) {
-            $valores[$i] = ord($cnpj[$i]) - 48;
+            $valores[$i] = intval($cnpj[$i]);
         }
 
         $pesos_dv1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
@@ -159,4 +188,5 @@ class CriarContaController {
 
         return $valores[13] == $dv2;
     }
+
 }

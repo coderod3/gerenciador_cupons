@@ -1,0 +1,182 @@
+/* Base */
+* { margin: 0;
+    padding: 0;
+    box-sizing: border-box; 
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #3c49dacc 0%, #007bff 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* pricipal */
+.card-wrapper {
+    background: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    text-align: center;
+    animation: floatIn 0.5s ease-out;
+}
+
+@keyframes floatIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* icone topo */
+.icon-lock {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef2ff;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.1);
+    vertical-align: middle;
+}
+
+.icon-lock img {
+    width: 48px;
+    height: 48px;
+}
+
+
+h2 {
+    color: #1f2937;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+p.subtitle {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+/* inputs limpos */
+.input-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.input-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+    display: block;
+    margin-left: 4px;
+}
+
+input[type="email"] {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 2px solid #f3f4f6;
+    border-radius: 12px;
+    font-size: 1rem;
+    transition: all 0.2s;
+    color: #1f2937;
+    background: #f9fafb;
+}
+
+input[type="email"]:focus {
+    background: #fff;
+    border-color: #4f46e5;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* seletor de tipo */
+.type-selector {
+    display: flex;
+    background: #f3f4f6;
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.type-selector label {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.type-selector input {
+    display: none;
+}
+
+/* estado ativo selecioando */
+.type-selector input:checked + span {
+    background: white;
+    color: #4f46e5;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.type-selector span {
+    display: block;
+    padding: 6px;
+    border-radius: 6px;
+}
+
+/* botão */
+.btn-submit {
+    background: #4f46e5;
+    color: white;
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-submit:hover {
+    background: #4338ca;
+    transform: translateY(-1px);
+}
+
+/* link voltar */
+.back-link {
+    display: inline-block;
+    margin-top: 1.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.back-link:hover { color: #1f2937; }
+
+/* mensagens */
+.msg-success {
+    background: #ecfdf5;
+    color: #065f46;
+    padding: 0.75rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #a7f3d0;
+}
